@@ -1,0 +1,115 @@
+Q1.	
+Premise:
+You have a table with one column, `original_date`, of datatype string
+ORIGINAL_DATE
+20190825
+20190826
+20190827
+20190828
+20190829
+20190830
+20190831
+20190901
+
+Question:
+Write a (preferably hive) SQL query to calculate two more columns – 
+1)	`end_of_week ` - the date of the next Sunday from `original_date`. If `original_date` is already a Sunday, this field should be the same value
+2)	`end_of_month ` - the value of the end of month date
+An acceptable solution is one which works for any valid date in the string format of `original_date`.
+
+Desired Result:
+ORIGINAL_DATE	END_OF_WEEK	END_OF_MONTH
+20190825	20190825	20190831
+20190826	20190901	20190831
+20190827	20190901	20190831
+20190828	20190901	20190831
+20190829	20190901	20190831
+20190830	20190901	20190831
+20190831	20190901	20190831
+20190901	20190901	20190930
+
+Additional Info: 
+20190825 is a Sunday, so the `end_of_week` for that value is still that same date. 
+20190827 is a Tuesday, and the next Sunday is on 20190901
+
+
+Notes:
+
+1. SOLUTION DETAILS:
+
+Actual Code: 
+***********************************************
+TOOLS USED : SQLITE
+LANGUAGE : QUERY
+**********************************************
+create table date_temp( original_date varchar(20));
+
+insert into date_temp values('20190825');
+insert into date_temp values('20190826');
+insert into date_temp values('20190827');
+insert into date_temp values('20190828');
+insert into date_temp values('20190829');
+insert into date_temp values('20190830');
+insert into date_temp values('20190831');
+insert into date_temp values('20190901');
+
+
+SELECT  original_date,
+date(substr( original_date, 1, 4) ||'-'|| substr( original_date, 5, 2)||'-'|| substr( original_date, 7, 2)),
+CASE
+    WHEN  (strftime("%w", date(substr( original_date, 1, 4) ||'-'|| substr( original_date, 5, 2)||'-'|| substr( original_date, 7, 2)))=='0') THEN date(substr( original_date, 1, 4) ||'-'|| substr( original_date, 5, 2)||'-'|| substr( original_date, 7, 2))
+    ELSE "not a sunday" 
+    END,
+    date("'"+(substr( original_date, 1, 4) ||'-'|| substr( original_date, 5, 2)||'-'|| substr( original_date, 7, 2))+"'",'start of month') month_end_date
+from date_temp;
+
+SOLUTION - 2
+***************************************************
+TOOLS USED : MS ACCESS
+LANGUAGE : SIMPLE QUERY FORMAT
+****************************************************
+SELECT cdate(mid(dATE.originalDate,1,4)&"/"&mid(dATE.originalDate,5,2)&"/"&mid(dATE.originalDate,7,2)) as ORIGINAL_DATE,
+	IIF(WEEKDAY(cdate(mid(dATE.originalDate,1,4)&"/"&mid(dATE.originalDate,5,2)&"/"&mid(dATE.originalDate,7,2))) >1,
+     		cdate(mid(dATE.originalDate,1,4)&"/"&mid(dATE.originalDate,5,2)&"/"&mid(dATE.originalDate,7,2)) +
+     		(8-WEEKDAY(cdate(mid(dATE.originalDate,1,4)&"/"&mid(dATE.originalDate,5,2)&"/"&mid(dATE.originalDate,7,2)))),
+	cdate(mid(dATE.originalDate,1,4)&"/"&mid(dATE.originalDate,5,2)&"/"&mid(dATE.originalDate,7,2))) AS END_OF_WEEK,
+	DATESERIAL(CINT(mid(dATE.originalDate,1,4)),
+        CINT(mid(dATE.originalDate,5,2)) + 1,0) AS END_OF_MONTH
+FROM [dATE];
+***************************************************
+
+3.Solution using Python
+
+import pandas as pd
+from datetime import datetime, timedelta
+
+# we can used databaase source in this place, used function for date source
+def datetime_range(start=None, end=None):
+    span = end - start
+    for i in range(span.days + 1):
+        yield start + timedelta(days=i)
+
+for date in datetime_range(start=datetime(2019, 12, 1), end=datetime(2020, 1, 15)):
+
+    if (date.weekday() == 6):
+        dt_wk = date
+#    if date == datetime.datetime(date.year, date.month, calendar.mdays[date.month]):
+#       dt_end= date_rng --- work on month end
+    else:
+        date
+    print(date, dt_wk)
+
+
+
+Psuedocode :
+   1) Get Date string and covert to Date format
+   2) Get the weekday details of the selected date
+   3) if weekday is sunday print the same date in END_OF_WEEK (or) find the number of days to reach the next sunday and add with the date  
+    selected
+   4) find the month end by using existing function DATESERIAL(yearselected,monthselected+1,0) will give the last day of that month
+Note : Oracle function to_date(WW format), last_day could have easy solution, no environment.
+
+
+
+
+
