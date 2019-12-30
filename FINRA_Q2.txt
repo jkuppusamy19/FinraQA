@@ -1,0 +1,70 @@
+Q2.
+
+Premise:
+You have a table `Activity`, with fields `ID`, `start_time`, and `end_time`. These fields are all of datatype string.
+ID	START_TIME	END_TIME
+100	10:00	12:00
+100	10:15	12:30
+100	12:15	12:45
+100	13:00	14:00
+200	10:15	10:30
+…	…	…
+
+Question:
+Write a (preferably hive) SQL query to create a new field `group_id` which identifies records within each `ID` that have overlapping `start_time` and `end_time` intervals. An acceptable solution will have a unique `group_id` for each `ID` and overlapping set of intervals.
+Desired Example: 
+ID	START_TIME	END_TIME	GROUP_ID
+100	10:00	12:00	1
+100	10:15	12:30	1
+100	12:15	12:45	1
+100	13:00	14:00	2
+200	10:15	10:30	3
+
+Additional Info: For a given `ID`, if any of its intervals overlap then the corresponding records belong to the same group, and thus should have the same `group_id`. A record A overlaps another record B when A’s `start_time` and/or `end_time` is between B’s `start_time` and `end_time`.
+
+In the example, `ID` = 100 has four intervals. The first three overlap => the second record overlaps with the first (the `start_time` of 10:15 is between the `start_time` and `end_time` of 10:00 to 12:00) and the third overlaps with the second (the `start_time` of 12:15 is between the `start_time` and `end_time` of 10:15 to 12:30). Because of this, they all have the same `group_id` of 1. The fourth interval for `ID` = 100 does not overlap any of the other intervals within that `ID`, and so it becomes its own group with a new `group_id`. The last record has a completely different `ID` and so it starts a third group also with a new `group_id`.
+
+
+Notes:
+
+
+1. SOLUTION DETAILS: 
+
+Actual Code: 
+***********************************************
+TOOL USED : Online SQL IDE
+LANGUAGE : SQL QUERY
+**********************************************
+
+create table table_time ( id varchar(3), start_time varchar(5), end_time varchar(5));
+
+insert into table_time values ( '100','10:00','12:00');
+insert into table_time values ( '100','10:15','12:30');
+insert into table_time values ( '100','12:15','12:45');
+insert into table_time values ( '100','13:00','14:00');
+insert into table_time values ( '200','10:15','10:30');
+
+--- Get all unique id with time ranges table  t1
+SELECT t.ID, t.start_time, t.end_time
+    FROM
+    (
+        SELECT ID, datetime(start_time) as start_time, end_time as end_time,
+               ROW_NUMBER() OVER (PARTITION BY id ORDER BY start_time) rn
+        FROM table_time
+    ) t
+    
+-- identifies all records whose both start time e and end time
+-- do not fall within the range of the start time ID record
+ -- table t2   
+    SELECT t1.ID, t1.start_time, t1.end_time
+    FROM SELECT t.ID, t.start_time, t.end_time
+    FROM
+    (
+        SELECT ID, datetime(start_time) as start_time, end_time as end_time,
+               ROW_NUMBER() OVER (PARTITION BY id ORDER BY start_time) rn
+        FROM table_time
+    )  t1
+    INNER JOIN cte1 t2
+        ON t1.ID = t2.ID AND
+           t1.EffectiveDate NOT BETWEEN t2.EffectiveDate AND t2.EndDate AND
+           t1.EndDate NOT BETWEEN t2.EffectiveDate AND t2.EndDate

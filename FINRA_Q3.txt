@@ -1,0 +1,124 @@
+Q3.
+
+Premise:
+Tracy has a file that contains a list of actors and the movies in which they acted. She wants to know the top 10 actors from her list whom have acted in the most movies.
+
+ACTOR_NAME	MOVIE_NAME
+Leonardo DiCaprio	The Revenant
+Samuel L. Jackson	Pulp Fiction
+Tom Cruise	Mission Impossible
+Leonardo DiCaprio	The Great Gatsby
+…	…
+	 
+Question:
+Write code (or pseudocode) in your favorite programming language to display the 10 actors appearing in the most movies, and the count of movies in which they have acted. If there are less than 10 actors in her list, display all of them.
+
+Consider all scenarios - such as, if two actors have acted in the same number of movies, they will have the same rank. 
+
+Notes:
+
+Solution 1
+
+Python3.
+
+Sample movie list comes from CSV file.
+
+import pandas as pd
+import numpy as np
+import pandas as pd
+
+df = pd.read_csv('C:\pythontest\movie.csv',delimiter = ',', names = ['actorname','moviename'])
+
+gm = df[['actorname','moviename']].groupby(['actorname']).size().reset_index(name='counts')
+gs = print(gm.sort_values('counts', ascending=False))
+print(gs)
+
+#gc = gs.filter(lambda x: x['counts'].size() > 3)
+#df[['actorname','moviename']].groupby(['actorname']).value_counts().loc#[lambda x: x>3]
+
+#countss = df.groupby('actorname')['moviename'].value_counts()
+#gf= gs.filter(lambda x: x['counts'].count() > 3)
+#print(gc)
+
+output:
+
+C:\Users\mpall>python C:\pythontest\test.py
+            actorname  counts
+0                   C       6
+1                   D       5
+12         Tom Cruise       5
+9   Leonardo DiCaprio       4
+13              kamal       4
+11  Samuel L. Jackson       3
+10             Rajini       2
+2                   E       1
+3                   F       1
+4                   G       1
+5                   H       1
+6                   I       1
+7                   J       1
+8                   K       1
+
+
+
+Solution 2
+**************************************
+TOOL : SQLITE ONLINE IDE
+LANGUAGE : SQL
+**************************************
+create table Move_list(actor_name varchar(20), Movie_name varchar(20));
+insert into Move_list values('Leonardo DiCaprio','The Revenant');
+insert into Move_list values('Samuel L. Jackson','Pulp Fiction');
+insert into Move_list values('Tom Cruise','Mission Impossible');
+insert into Move_list values('Leonardo DiCaprio','sample movie 1');
+insert into Move_list values('Leonardo DiCaprio','Pulp Fiction');
+insert into Move_list values('Leonardo DiCaprio','sample movie 3');
+insert into Move_list values('Leonardo DiCaprio','sample movie 4');
+insert into Move_list values('Tom Cruise','The Great Gatsby 4');
+insert into Move_list values('Tom Cruise','The Great Gatsby 5');
+insert into Move_list values('Tom Cruise','Pulp Fiction');
+insert into Move_list values('Samuel L. Jackson','Pulp Fiction 1');
+insert into Move_list values('Rajini','Muthu');
+insert into Move_list values('kamal','sathya');
+insert into Move_list values('kamal','PKS');
+insert into Move_list values('C','1');
+insert into Move_list values('C','2');
+insert into Move_list values('C','Pulp Fiction 2');
+insert into Move_list values('C','Muthu 3');
+insert into Move_list values('C','sathya 5');
+insert into Move_list values('C','PKS 10');
+insert into Move_list values('D','The Great Gatsby 5');
+insert into Move_list values('D','12');
+insert into Move_list values('D','Pulp Fiction 45');
+insert into Move_list values('D','Pulp Fiction 15');
+insert into Move_list values('D','Muthu 23');
+insert into Move_list values('E','sathya D');
+insert into Move_list values('F','PKS N');
+insert into Move_list values('G','The GreaDt Gatsby 5');
+insert into Move_list values('H','sathya 4');
+insert into Move_list values('I','sathya 4');
+insert into Move_list values('J','sathya 6');
+insert into Move_list values('K','sathya 7');
+insert into Move_list values('Tom Cruise','Pulp Fiction 7');
+insert into Move_list values('Samuel L. Jackson','Pulp Fiction 14');
+insert into Move_list values('Rajini','Muthu 7');
+insert into Move_list values('kamal','sathya 7');
+insert into Move_list values('kamal','PKS 5');
+
+select actor_name, count(movie_name) tot_movie,count(distinct actor_name) from Move_list
+group by actor_name having count(movie_name) > 5
+order by count(movie_name) desc ;
+**********************************************
+PSEUDOCODE :
+
+ 1) Insert Movie Name and actor name records
+ 2) first group by actor having count more than 5 movies <we can change as per question for 10 movies"
+ 3) orderby count of movie name
+
+output in sqllite: for 3 movies
+*******************
+C|6|1
+Tom Cruise|5|1
+Leonardo DiCaprio|5|1
+D|5|1
+kamal|4|1
